@@ -1,6 +1,5 @@
-
-import React from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import React, { useMemo } from 'react';
+import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import type { TreadmillData, Workout } from '../types';
 import { SpeedIcon, InclineIcon, DistanceIcon, HeartIcon } from './Icons';
 
@@ -23,6 +22,42 @@ const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: string; 
 );
 
 export const Dashboard: React.FC<DashboardProps> = ({ data, workoutHistory, workout }) => {
+
+  const chartData = useMemo(() => {
+    if (!workout) {
+      return [];
+    }
+
+    const profileData: { time: number; targetSpeed: number; targetIncline: number; speed: number | null; incline: number | null; heartRate: number | null; }[] = [];
+    let cumulativeTime = 0;
+    for (const step of workout.steps) {
+      for (let i = 0; i < step.duration; i++) {
+        profileData.push({
+          time: cumulativeTime + i,
+          targetSpeed: step.speed ?? 0,
+          targetIncline: step.incline ?? 0,
+          speed: null,
+          incline: null,
+          heartRate: null,
+        });
+      }
+      cumulativeTime += step.duration;
+    }
+
+    workoutHistory.forEach((historyPoint) => {
+      if (profileData[historyPoint.time]) {
+        profileData[historyPoint.time].speed = historyPoint.speed;
+        profileData[historyPoint.time].incline = historyPoint.incline;
+        if (historyPoint.heartRate) {
+          profileData[historyPoint.time].heartRate = historyPoint.heartRate;
+        }
+      }
+    });
+
+    return profileData;
+  }, [workout, workoutHistory]);
+
+
   return (
     <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg shadow-lg p-6 space-y-6">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -33,26 +68,31 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, workoutHistory, work
       </div>
       <div className="h-80 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          {workout && workoutHistory.length > 0 ? (
-            <LineChart data={workoutHistory} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+          {workout ? (
+            <ComposedChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }} barGap={0} barCategoryGap={0}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis dataKey="time" stroke="#9ca3af" />
+              <XAxis dataKey="time" stroke="#9ca3af" tickFormatter={(time) => `${Math.floor(time/60)}m`}/>
               <YAxis yAxisId="left" stroke="#38bdf8" label={{ value: 'Speed (km/h)', angle: -90, position: 'insideLeft', fill: '#38bdf8' }} />
               <YAxis yAxisId="right" orientation="right" stroke="#4ade80" label={{ value: 'Incline (%)', angle: 90, position: 'insideRight', fill: '#4ade80' }} />
               <Tooltip
                 contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
                 labelStyle={{ color: '#d1d5db' }}
+                formatter={(value, name, props) => [typeof value === 'number' ? value.toFixed(1) : value, name]}
               />
               <Legend wrapperStyle={{color: '#d1d5db'}}/>
-              <Line yAxisId="left" type="monotone" dataKey="speed" stroke="#38bdf8" strokeWidth={2} name="Actual Speed" dot={false} />
-              <Line yAxisId="left" type="step" dataKey="targetSpeed" stroke="#38bdf8" strokeDasharray="5 5" strokeWidth={1.5} name="Target Speed" dot={false} />
-              <Line yAxisId="right" type="monotone" dataKey="incline" stroke="#4ade80" strokeWidth={2} name="Actual Incline" dot={false} />
-              <Line yAxisId="right" type="step" dataKey="targetIncline" stroke="#4ade80" strokeDasharray="5 5" strokeWidth={1.5} name="Target Incline" dot={false} />
-              {data.heartRate && <Line yAxisId="right" type="monotone" dataKey="heartRate" stroke="#f87171" strokeWidth={2} name="Heart Rate" dot={false} />}
-            </LineChart>
+              
+              {/* Workout Profile Bars */}
+              <Bar yAxisId="left" dataKey="targetSpeed" fill="#38bdf8" fillOpacity={0.4} name="Target Speed" isAnimationActive={false}/>
+              <Bar yAxisId="right" dataKey="targetIncline" fill="#4ade80" fillOpacity={0.4} name="Target Incline" isAnimationActive={false}/>
+
+              {/* Live Data Lines */}
+              <Line yAxisId="left" type="monotone" dataKey="speed" stroke="#0ea5e9" strokeWidth={3} name="Actual Speed" dot={false} connectNulls={false} isAnimationActive={false} />
+              <Line yAxisId="right" type="monotone" dataKey="incline" stroke="#22c55e" strokeWidth={3} name="Actual Incline" dot={false} connectNulls={false} isAnimationActive={false} />
+              {chartData.some(p => p.heartRate) && <Line yAxisId="right" type="monotone" dataKey="heartRate" stroke="#f87171" strokeWidth={2} name="Heart Rate" dot={false} connectNulls={false} isAnimationActive={false} />}
+            </ComposedChart>
           ) : (
             <div className="flex items-center justify-center h-full text-gray-500">
-                {workout ? "Start workout to see live data" : "Load a workout or connect to a treadmill to begin"}
+                Load a workout or connect to a treadmill to begin
             </div>
           )}
         </ResponsiveContainer>
@@ -60,4 +100,3 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, workoutHistory, work
     </div>
   );
 };
-   
