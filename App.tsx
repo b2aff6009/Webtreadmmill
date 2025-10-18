@@ -64,6 +64,12 @@ function App() {
   const workoutControl = useWorkout({ onStepChange });
 
   const handleLoadWorkout = (workout: Workout) => {
+    // Stop any currently running activity (workout or manual) before loading a new one.
+    workoutControl.stop(); // Resets the workout state
+    if (ftms.connectionStatus === ConnectionStatus.CONNECTED) {
+      ftms.stopWorkout(); // Stops the physical treadmill
+    }
+
     setWorkoutHistory([]);
     setActiveTab('workout');
     workoutControl.loadWorkout(workout);
@@ -145,6 +151,7 @@ function App() {
             data={ftms.treadmillData}
             workoutHistory={workoutHistory}
             workout={workoutControl.workout}
+            settings={settings}
           />
         </div>
         

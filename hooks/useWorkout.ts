@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { Workout, WorkoutStep } from '../types';
 
@@ -57,9 +56,8 @@ export const useWorkout = ({ onStepChange }: UseWorkoutProps) => {
     setTotalTime(0);
     setIsPaused(true);
     setIsFinished(false);
-    if (newWorkout && newWorkout.steps.length > 0) {
-      onStepChangeRef.current?.(newWorkout.steps[0]);
-    }
+    // Do not send the first step's command on load.
+    // This will be handled by the play() function.
   }, []);
 
   const play = useCallback(() => {
@@ -98,4 +96,3 @@ export const useWorkout = ({ onStepChange }: UseWorkoutProps) => {
     stop,
   };
 };
-   
