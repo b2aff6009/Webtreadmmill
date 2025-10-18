@@ -7,6 +7,15 @@ interface SettingsProps {
   onThresholdHrChange: (hr: number) => void;
 }
 
+// Friel LTHR Zones as a common standard
+const heartRateZones = [
+  { name: 'Zone 1', lower: 0, upper: 0.85, color: 'bg-blue-500/20' },
+  { name: 'Zone 2', lower: 0.85, upper: 0.89, color: 'bg-green-500/20' },
+  { name: 'Zone 3', lower: 0.90, upper: 0.94, color: 'bg-yellow-500/20' },
+  { name: 'Zone 4', lower: 0.95, upper: 0.99, color: 'bg-orange-500/20' },
+  { name: 'Zone 5', lower: 1.0, upper: 1.06, color: 'bg-red-500/20' },
+];
+
 export const Settings: React.FC<SettingsProps> = ({
   thresholdPace,
   onThresholdPaceChange,
@@ -52,6 +61,27 @@ export const Settings: React.FC<SettingsProps> = ({
             />
             <span className="ml-2 text-gray-400 text-sm">bpm</span>
           </div>
+        </div>
+      </div>
+
+      <div className="pt-4 border-t border-gray-700">
+        <h3 className="text-lg font-semibold text-gray-100">Heart Rate Zones</h3>
+        <p className="text-sm text-gray-400 mt-1 mb-4">
+          Calculated based on your Threshold Heart Rate (LTHR).
+        </p>
+        <div className="space-y-2">
+            {heartRateZones.map((zone) => {
+                const lowerBpm = Math.round(thresholdHr * zone.lower);
+                const upperBpm = Math.round(thresholdHr * zone.upper);
+                return (
+                    <div key={zone.name} className={`flex justify-between items-center p-2 rounded-md ${zone.color}`}>
+                        <span className="font-semibold text-sm">{zone.name}</span>
+                        <span className="font-mono text-sm">
+                            {zone.name === 'Zone 5' ? `${lowerBpm}+ bpm` : `${lowerBpm} - ${upperBpm} bpm`}
+                        </span>
+                    </div>
+                );
+            })}
         </div>
       </div>
     </div>

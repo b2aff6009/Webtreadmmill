@@ -11,6 +11,7 @@ import { ConnectionStatus } from './types';
 import { ConnectButton } from './components/ConnectButton';
 import { Settings } from './components/Settings';
 import { TabbedView } from './components/TabbedView';
+import { WorkoutLibrary } from './components/WorkoutLibrary';
 
 function App() {
   const [workoutHistory, setWorkoutHistory] = useState<
@@ -90,6 +91,40 @@ function App() {
 
   const isConnected = ftms.connectionStatus === ConnectionStatus.CONNECTED;
 
+  const workoutTabContent = (
+    <div className="flex flex-col h-full">
+      <div className="flex-grow">
+        {!workoutControl.workout ? (
+          <div className="h-full flex items-center justify-center">
+            <WorkoutImporter onLoad={handleLoadWorkout} settings={settings} />
+          </div>
+        ) : (
+          <WorkoutPlayer
+            workout={workoutControl.workout}
+            currentStepIndex={workoutControl.currentStepIndex}
+            timeInStep={workoutControl.timeInStep}
+            totalTime={workoutControl.totalTime}
+            isPaused={workoutControl.isPaused}
+            onPlay={handleStartWorkout}
+            onPause={workoutControl.pause}
+            onStop={handleStopWorkout}
+            onReset={handleResetWorkout}
+            connectionStatus={ftms.connectionStatus}
+          />
+        )}
+      </div>
+      <div className="flex-shrink-0">
+        <ManualControls
+          onSetSpeed={ftms.setTargetSpeed}
+          onSetIncline={ftms.setTargetIncline}
+          onStart={ftms.startWorkout}
+          onStop={ftms.stopWorkout}
+          disabled={ftms.connectionStatus !== ConnectionStatus.CONNECTED || workoutControl.isActive}
+        />
+      </div>
+    </div>
+  );
+
   return (
     <div className="h-full bg-gray-900 text-gray-200 font-sans p-4 sm:p-6 lg:p-8 flex flex-col">
       <Header
@@ -117,27 +152,11 @@ function App() {
           <div className="flex-grow min-h-0">
             <TabbedView
               tabs={[
+                { key: 'workout', label: 'Workout', content: workoutTabContent },
                 {
-                  key: 'workout',
-                  label: 'Workout',
-                  content: !workoutControl.workout ? (
-                    <div className="h-full flex items-center justify-center">
-                      <WorkoutImporter onLoad={handleLoadWorkout} settings={settings} />
-                    </div>
-                  ) : (
-                    <WorkoutPlayer
-                      workout={workoutControl.workout}
-                      currentStepIndex={workoutControl.currentStepIndex}
-                      timeInStep={workoutControl.timeInStep}
-                      totalTime={workoutControl.totalTime}
-                      isPaused={workoutControl.isPaused}
-                      onPlay={handleStartWorkout}
-                      onPause={workoutControl.pause}
-                      onStop={handleStopWorkout}
-                      onReset={handleResetWorkout}
-                      connectionStatus={ftms.connectionStatus}
-                    />
-                  ),
+                  key: 'library',
+                  label: 'Library',
+                  content: <WorkoutLibrary onLoad={handleLoadWorkout} settings={settings} />,
                 },
                 {
                   key: 'settings',
@@ -154,16 +173,6 @@ function App() {
               ]}
               activeTab={activeTab}
               onTabChange={setActiveTab}
-            />
-          </div>
-
-          <div className="flex-shrink-0">
-            <ManualControls 
-              onSetSpeed={ftms.setTargetSpeed}
-              onSetIncline={ftms.setTargetIncline}
-              onStart={ftms.startWorkout}
-              onStop={ftms.stopWorkout}
-              disabled={ftms.connectionStatus !== ConnectionStatus.CONNECTED || workoutControl.isActive}
             />
           </div>
         </div>
