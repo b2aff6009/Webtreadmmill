@@ -22,13 +22,23 @@ const formatTime = (seconds: number): string => {
   return `${mins}:${secs}`;
 };
 
+const formatSpeedToPace = (speedKmh: number): string => {
+  if (speedKmh <= 0) {
+    return '--:--';
+  }
+  const paceDecimalMinutes = 60 / speedKmh;
+  const minutes = Math.floor(paceDecimalMinutes);
+  const seconds = Math.round((paceDecimalMinutes - minutes) * 60);
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+};
+
 const WorkoutStepView: React.FC<{ step: WorkoutStep, title: string, isActive?: boolean }> = ({ step, title, isActive = false }) => (
   <div className={`p-3 rounded-md ${isActive ? 'bg-cyan-900/50 ring-2 ring-cyan-500' : 'bg-gray-700'}`}>
     <p className={`font-semibold ${isActive ? 'text-cyan-400' : 'text-gray-400'}`}>{title}</p>
     <div className="flex justify-between items-baseline mt-1">
       <p className="text-xl font-bold">{formatTime(step.duration)}</p>
       <div className="flex items-center space-x-3 text-sm">
-        {step.speed !== undefined && <span className="flex items-center"><SpeedIcon className="w-4 h-4 mr-1 text-cyan-400"/> {step.speed.toFixed(1)} km/h</span>}
+        {step.speed !== undefined && <span className="flex items-center"><SpeedIcon className="w-4 h-4 mr-1 text-cyan-400"/> {formatSpeedToPace(step.speed)} min/km</span>}
         {step.incline !== undefined && <span className="flex items-center"><InclineIcon className="w-4 h-4 mr-1 text-green-400"/> {step.incline.toFixed(1)}%</span>}
       </div>
     </div>

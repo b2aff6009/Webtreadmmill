@@ -234,7 +234,8 @@ export const useFtms = ({ onData, testMode = false }: FtmsHookProps) => {
         testModeTargetInclineRef.current = 0;
         return;
     }
-    sendCommand(new Uint8Array([0x08, 0x01]));
+    // 0x01 is pause, 0x02 is stop
+    sendCommand(new Uint8Array([0x08, 0x02]));
   }, [sendCommand, testMode]);
 
   return {

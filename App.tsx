@@ -9,12 +9,19 @@ import { useWorkout } from './hooks/useWorkout';
 import type { Workout, WorkoutStep } from './types';
 import { ConnectionStatus } from './types';
 import { ConnectButton } from './components/ConnectButton';
+import { Settings } from './components/Settings';
+import { TabbedView } from './components/TabbedView';
 
 function App() {
   const [workoutHistory, setWorkoutHistory] = useState<
     { time: number; speed: number; incline: number; heartRate?: number; targetSpeed: number; targetIncline: number }[]
   >([]);
   const [isTestMode, setIsTestMode] = useState(false);
+  const [settings, setSettings] = useState({
+    thresholdPace: '4:30',
+    thresholdHr: 165,
+  });
+  const [activeTab, setActiveTab] = useState('workout');
 
   const onTreadmillData = useCallback((data: { speed: number; incline: number; heartRate?: number }) => {
     setWorkoutHistory(prev => {
@@ -57,6 +64,7 @@ function App() {
 
   const handleLoadWorkout = (workout: Workout) => {
     setWorkoutHistory([]);
+    setActiveTab('workout');
     workoutControl.loadWorkout(workout);
   };
   
@@ -75,11 +83,15 @@ function App() {
       alert(`Please connect to a treadmill first${isTestMode ? ' (in test mode)' : ''}.`);
     }
   }
+  
+  const handleResetWorkout = () => {
+    workoutControl.loadWorkout(null);
+  }
 
   const isConnected = ftms.connectionStatus === ConnectionStatus.CONNECTED;
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-200 font-sans p-4 sm:p-6 lg:p-8 flex flex-col">
+    <div className="h-full bg-gray-900 text-gray-200 font-sans p-4 sm:p-6 lg:p-8 flex flex-col">
       <Header
         isTestMode={isTestMode}
         onTestModeChange={setIsTestMode}
@@ -92,8 +104,8 @@ function App() {
         />
       </Header>
 
-      <main className="flex-grow grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-        <div className="lg:col-span-2 flex flex-col gap-6">
+      <main className="flex-grow flex flex-col lg:flex-row gap-6 mt-6 min-h-0">
+        <div className="lg:w-2/3 flex flex-col gap-6">
           <Dashboard 
             data={ftms.treadmillData}
             workoutHistory={workoutHistory}
@@ -101,28 +113,59 @@ function App() {
           />
         </div>
         
-        <div className="bg-gray-800 rounded-lg shadow-lg p-6 flex flex-col gap-6">
-          {!workoutControl.workout ? (
-            <WorkoutImporter onLoad={handleLoadWorkout} />
-          ) : (
-            <WorkoutPlayer 
-              workout={workoutControl.workout}
-              currentStepIndex={workoutControl.currentStepIndex}
-              timeInStep={workoutControl.timeInStep}
-              totalTime={workoutControl.totalTime}
-              isPaused={workoutControl.isPaused}
-              onPlay={handleStartWorkout}
-              onPause={workoutControl.pause}
-              onStop={handleStopWorkout}
-              onReset={() => workoutControl.loadWorkout(null)}
-              connectionStatus={ftms.connectionStatus}
+        <div className="lg:w-1/3 bg-gray-800 rounded-lg shadow-lg p-6 flex flex-col gap-6">
+          <div className="flex-grow min-h-0">
+            <TabbedView
+              tabs={[
+                {
+                  key: 'workout',
+                  label: 'Workout',
+                  content: !workoutControl.workout ? (
+                    <div className="h-full flex items-center justify-center">
+                      <WorkoutImporter onLoad={handleLoadWorkout} settings={settings} />
+                    </div>
+                  ) : (
+                    <WorkoutPlayer
+                      workout={workoutControl.workout}
+                      currentStepIndex={workoutControl.currentStepIndex}
+                      timeInStep={workoutControl.timeInStep}
+                      totalTime={workoutControl.totalTime}
+                      isPaused={workoutControl.isPaused}
+                      onPlay={handleStartWorkout}
+                      onPause={workoutControl.pause}
+                      onStop={handleStopWorkout}
+                      onReset={handleResetWorkout}
+                      connectionStatus={ftms.connectionStatus}
+                    />
+                  ),
+                },
+                {
+                  key: 'settings',
+                  label: 'Settings',
+                  content: (
+                    <Settings
+                      thresholdPace={settings.thresholdPace}
+                      onThresholdPaceChange={(pace) => setSettings(s => ({ ...s, thresholdPace: pace }))}
+                      thresholdHr={settings.thresholdHr}
+                      onThresholdHrChange={(hr) => setSettings(s => ({ ...s, thresholdHr: hr }))}
+                    />
+                  ),
+                },
+              ]}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
             />
-          )}
-          <ManualControls 
-            onSetSpeed={ftms.setTargetSpeed}
-            onSetIncline={ftms.setTargetIncline}
-            disabled={ftms.connectionStatus !== ConnectionStatus.CONNECTED || workoutControl.isActive}
-          />
+          </div>
+
+          <div className="flex-shrink-0">
+            <ManualControls 
+              onSetSpeed={ftms.setTargetSpeed}
+              onSetIncline={ftms.setTargetIncline}
+              onStart={ftms.startWorkout}
+              onStop={ftms.stopWorkout}
+              disabled={ftms.connectionStatus !== ConnectionStatus.CONNECTED || workoutControl.isActive}
+            />
+          </div>
         </div>
       </main>
     </div>
