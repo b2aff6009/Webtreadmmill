@@ -8,6 +8,10 @@ This contains everything you need to run your app locally.
 
 View your app in AI Studio: https://ai.studio/apps/drive/1ayNy1sRSL1eud9leCiXeUiKYE57ExzQx
 
+## 🌐 Live Demo
+
+**Try it now → [b2aff6009.github.io/webtreadmmill/](https://b2aff6009.github.io/webtreadmmill/)**
+
 ## Run Locally
 
 **Prerequisites:**  Node.js
