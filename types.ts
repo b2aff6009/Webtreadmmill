@@ -1,24 +1,23 @@
-
 export interface WorkoutStep {
-  duration: number;
-  speed?: number;
-  incline?: number;
-  power?: number; // from ZWO, can be mapped to intensity
+  duration: number
+  speed?: number
+  incline?: number
+  power?: number // from ZWO, can be mapped to intensity
 }
 
 export interface Workout {
-  name: string;
-  description: string;
-  steps: WorkoutStep[];
+  name: string
+  description: string
+  steps: WorkoutStep[]
 }
 
 export interface TreadmillData {
-  speed: number;
-  incline: number;
-  distance: number;
-  heartRate?: number;
-  calories?: number;
-  time?: string;
+  speed: number
+  incline: number
+  distance: number
+  heartRate?: number
+  calories?: number
+  time?: string
 }
 
 export enum ConnectionStatus {
@@ -27,4 +26,3 @@ export enum ConnectionStatus {
   CONNECTED = 'Connected',
   ERROR = 'Error',
 }
-   
