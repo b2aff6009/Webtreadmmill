@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
     },
     // GitHub Pages serves from a subdirectory, adjust base path accordingly
-    base: mode === "production" ? "/Webtreadmmill/" : "/",
+    base: mode === "production" ? "/webmill/" : "/",
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

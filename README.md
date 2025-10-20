@@ -10,7 +10,7 @@ View your app in AI Studio: https://ai.studio/apps/drive/1ayNy1sRSL1eud9leCiXeUi
 
 ## 🌐 Live Demo
 
-**Try it now → [b2aff6009.github.io/Webtreadmmill/](https://b2aff6009.github.io/Webtreadmmill/)**
+**Try it now → [b2aff6009.github.io/webmill/](https://b2aff6009.github.io/webmill/)**
 
 ## Run Locally
 
