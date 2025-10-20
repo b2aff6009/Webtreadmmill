@@ -1,13 +1,13 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  FTMS_SERVICE_UUID,
-  TREADMILL_DATA_CHARACTERISTIC_UUID,
   FITNESS_MACHINE_CONTROL_POINT_UUID,
+  FTMS_SERVICE_UUID,
+  HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID,
   HEART_RATE_SERVICE_UUID,
-  HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID
+  TREADMILL_DATA_CHARACTERISTIC_UUID
 } from '../constants';
-import { ConnectionStatus } from '../types';
 import type { TreadmillData } from '../types';
+import { ConnectionStatus } from '../types';
 
 interface FtmsHookProps {
   onData?: (data: { speed: number; incline: number; heartRate?: number }) => void;
@@ -17,7 +17,7 @@ interface FtmsHookProps {
 export const useFtms = ({ onData, testMode = false }: FtmsHookProps) => {
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>(ConnectionStatus.DISCONNECTED);
   const [treadmillData, setTreadmillData] = useState<TreadmillData>({ speed: 0, incline: 0, distance: 0 });
-  
+
   const deviceRef = useRef<any | null>(null);
   const controlPointCharRef = useRef<any | null>(null);
   const heartRateRef = useRef<number | undefined>(undefined);
@@ -36,7 +36,7 @@ export const useFtms = ({ onData, testMode = false }: FtmsHookProps) => {
 
     const dataView = new DataView(value.buffer);
     const flags = dataView.getUint16(0, true);
-    
+
     let offset = 2;
     const speed = (flags & 0x02) ? dataView.getUint16(offset, true) * 0.01 : 0;
     offset += (flags & 0x02) ? 2 : 0;
@@ -53,7 +53,7 @@ export const useFtms = ({ onData, testMode = false }: FtmsHookProps) => {
   const handleHeartRateData = useCallback((event: Event) => {
     const value = (event.target as any).value;
     if (!value) return;
-    
+
     const dataView = new DataView(value.buffer);
     const flags = dataView.getUint8(0);
     const hrFormat = (flags & 0x01) ? 'UINT16' : 'UINT8';
@@ -62,12 +62,12 @@ export const useFtms = ({ onData, testMode = false }: FtmsHookProps) => {
 
   const disconnect = useCallback(() => {
     if (testMode) {
-        if (simulationIntervalRef.current) clearInterval(simulationIntervalRef.current);
-        simulationIntervalRef.current = null;
-        setTreadmillData({ speed: 0, incline: 0, distance: 0 });
-        console.log('[TEST MODE] Disconnected');
+      if (simulationIntervalRef.current) clearInterval(simulationIntervalRef.current);
+      simulationIntervalRef.current = null;
+      setTreadmillData({ speed: 0, incline: 0, distance: 0 });
+      console.log('[TEST MODE] Disconnected');
     } else {
-        deviceRef.current?.gatt?.disconnect();
+      deviceRef.current?.gatt?.disconnect();
     }
     setConnectionStatus(ConnectionStatus.DISCONNECTED);
     deviceRef.current = null;
@@ -111,14 +111,14 @@ export const useFtms = ({ onData, testMode = false }: FtmsHookProps) => {
           const inclineDiff = testModeTargetInclineRef.current - prev.incline;
           if (Math.abs(inclineDiff) < 0.1) newIncline = testModeTargetInclineRef.current;
           else newIncline += Math.sign(inclineDiff) * 0.1;
-          
+
           const newDistance = prev.distance + (newSpeed / 3600); // km per second
 
           const updatedData = {
-              ...prev,
-              speed: Math.round(newSpeed * 10) / 10,
-              incline: Math.round(newIncline * 10) / 10,
-              distance: newDistance,
+            ...prev,
+            speed: Math.round(newSpeed * 10) / 10,
+            incline: Math.round(newIncline * 10) / 10,
+            distance: newDistance,
           };
           onData?.({ speed: updatedData.speed, incline: updatedData.incline, heartRate: prev.heartRate });
           return updatedData;
@@ -135,12 +135,12 @@ export const useFtms = ({ onData, testMode = false }: FtmsHookProps) => {
 
   const connect = useCallback(async () => {
     if (testMode) {
-        setConnectionStatus(ConnectionStatus.CONNECTING);
-        setTimeout(() => {
-            setConnectionStatus(ConnectionStatus.CONNECTED);
-            console.log('[TEST MODE] Connected');
-        }, 500);
-        return;
+      setConnectionStatus(ConnectionStatus.CONNECTING);
+      setTimeout(() => {
+        setConnectionStatus(ConnectionStatus.CONNECTED);
+        console.log('[TEST MODE] Connected');
+      }, 500);
+      return;
     }
     try {
       setConnectionStatus(ConnectionStatus.CONNECTING);
@@ -157,7 +157,7 @@ export const useFtms = ({ onData, testMode = false }: FtmsHookProps) => {
       const ftmsService = await server.getPrimaryService(FTMS_SERVICE_UUID);
       const treadmillDataChar = await ftmsService.getCharacteristic(TREADMILL_DATA_CHARACTERISTIC_UUID);
       controlPointCharRef.current = await ftmsService.getCharacteristic(FITNESS_MACHINE_CONTROL_POINT_UUID);
-      
+
       await treadmillDataChar.startNotifications();
       treadmillDataChar.addEventListener('characteristicvaluechanged', handleTreadmillData);
 
@@ -185,18 +185,18 @@ export const useFtms = ({ onData, testMode = false }: FtmsHookProps) => {
 
   const sendCommand = useCallback((command: Uint8Array) => {
     if (testMode) {
-        // In test mode, we just log the command
-        console.log('[TEST MODE] Command Sent:', command);
-        return;
+      // In test mode, we just log the command
+      console.log('[TEST MODE] Command Sent:', command);
+      return;
     }
     setCommandQueue(prevQueue => [...prevQueue, command]);
   }, [testMode]);
 
   const setTargetSpeed = useCallback((speed: number) => {
     if (testMode) {
-        testModeTargetSpeedRef.current = speed;
-        console.log(`[TEST MODE] Set Target Speed: ${speed} km/h`);
-        return;
+      testModeTargetSpeedRef.current = speed;
+      console.log(`[TEST MODE] Set Target Speed: ${speed} km/h`);
+      return;
     }
     const buffer = new ArrayBuffer(3);
     const view = new DataView(buffer);
@@ -207,9 +207,9 @@ export const useFtms = ({ onData, testMode = false }: FtmsHookProps) => {
 
   const setTargetIncline = useCallback((incline: number) => {
     if (testMode) {
-        testModeTargetInclineRef.current = incline;
-        console.log(`[TEST MODE] Set Target Incline: ${incline}%`);
-        return;
+      testModeTargetInclineRef.current = incline;
+      console.log(`[TEST MODE] Set Target Incline: ${incline}%`);
+      return;
     }
     const buffer = new ArrayBuffer(3);
     const view = new DataView(buffer);
@@ -217,22 +217,22 @@ export const useFtms = ({ onData, testMode = false }: FtmsHookProps) => {
     view.setInt16(1, incline * 10, true);
     sendCommand(new Uint8Array(buffer));
   }, [sendCommand, testMode]);
-  
+
   const startWorkout = useCallback(() => {
     if (testMode) {
-        console.log('[TEST MODE] Start Workout');
-        testModeTargetSpeedRef.current = 2.0; // Start at a slow walk
-        return;
+      console.log('[TEST MODE] Start Workout');
+      testModeTargetSpeedRef.current = 2.0; // Start at a slow walk
+      return;
     }
     sendCommand(new Uint8Array([0x07, 0x02]));
   }, [sendCommand, testMode]);
 
   const stopWorkout = useCallback(() => {
-     if (testMode) {
-        console.log('[TEST MODE] Stop Workout');
-        testModeTargetSpeedRef.current = 0;
-        testModeTargetInclineRef.current = 0;
-        return;
+    if (testMode) {
+      console.log('[TEST MODE] Stop Workout');
+      testModeTargetSpeedRef.current = 0;
+      testModeTargetInclineRef.current = 0;
+      return;
     }
     // 0x01 is pause, 0x02 is stop
     sendCommand(new Uint8Array([0x08, 0x02]));

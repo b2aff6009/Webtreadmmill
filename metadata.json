@@ -1,5 +1,5 @@
 {
-  "name": "WTM - WebTreadMill",
+  "name": "WebMill",
   "description": "A browser-based treadmill controller and workout player that connects directly to BLE FTMS devices and imports workouts from .zwo files. All logic runs client-side.",
   "requestFramePermissions": [
     "bluetooth"

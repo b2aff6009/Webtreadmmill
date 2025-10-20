@@ -1,8 +1,18 @@
 {
   "name": "wtm---webtreadmill",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
+  "author": "b2aff6009",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/b2aff6009/webmill.git"
+  },
+  "homepage": "https://b2aff6009.github.io/webmill/",
+  "bugs": {
+    "url": "https://github.com/b2aff6009/webmill/issues"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -15,6 +25,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
+    "@types/react": "^19.2.2",
     "@vitejs/plugin-react": "^5.0.0",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"

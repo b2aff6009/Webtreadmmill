@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Workout, WorkoutStep } from '../types';
 
 interface UseWorkoutProps {
@@ -12,7 +12,7 @@ export const useWorkout = ({ onStepChange }: UseWorkoutProps) => {
   const [totalTime, setTotalTime] = useState(0);
   const [isPaused, setIsPaused] = useState(true);
   const [isFinished, setIsFinished] = useState(false);
-  
+
   const intervalRef = useRef<number | null>(null);
   const onStepChangeRef = useRef(onStepChange);
 

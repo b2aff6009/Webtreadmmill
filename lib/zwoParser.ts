@@ -24,7 +24,7 @@ export const parseZwoFile = (fileContent: string): Workout => {
   }
 
   const steps: WorkoutStep[] = [];
-  
+
   workoutNode.childNodes.forEach((node) => {
     if (node.nodeType !== Node.ELEMENT_NODE) return;
 
@@ -36,7 +36,7 @@ export const parseZwoFile = (fileContent: string): Workout => {
       const repeat = parseInt(element.getAttribute('Repeat') || '1', 10);
       const onDuration = parseInt(element.getAttribute('OnDuration') || '0', 10);
       const offDuration = parseInt(element.getAttribute('OffDuration') || '0', 10);
-      
+
       const onPaceAttr = element.getAttribute('OnPace');
       const offPaceAttr = element.getAttribute('OffPace');
       const onPowerAttr = element.getAttribute('OnPower');
@@ -45,45 +45,45 @@ export const parseZwoFile = (fileContent: string): Workout => {
       for (let i = 0; i < repeat; i++) {
         // ON Interval
         if (onDuration > 0) {
-            const onStep: Partial<WorkoutStep> = { duration: onDuration };
-            if (sportType === 'run' && onPaceAttr) {
-                onStep.speed = parseFloat(onPaceAttr) * 3.6; // m/s to km/h
-            } else if (onPowerAttr) {
-                const power = parseFloat(onPowerAttr);
-                onStep.power = power;
-                if (sportType === 'run') {
-                    // Estimate running speed from power. 1.0 FTP ~ 14 km/h.
-                    onStep.speed = power * 14; 
-                } else { // Bike
-                    onStep.speed = power * 10;
-                    onStep.incline = power * 2;
-                }
+          const onStep: Partial<WorkoutStep> = { duration: onDuration };
+          if (sportType === 'run' && onPaceAttr) {
+            onStep.speed = parseFloat(onPaceAttr) * 3.6; // m/s to km/h
+          } else if (onPowerAttr) {
+            const power = parseFloat(onPowerAttr);
+            onStep.power = power;
+            if (sportType === 'run') {
+              // Estimate running speed from power. 1.0 FTP ~ 14 km/h.
+              onStep.speed = power * 14;
+            } else { // Bike
+              onStep.speed = power * 10;
+              onStep.incline = power * 2;
             }
-            if (onStep.speed !== undefined) {
-                if(onStep.incline === undefined) onStep.incline = 0;
-                steps.push(onStep as WorkoutStep);
-            }
+          }
+          if (onStep.speed !== undefined) {
+            if (onStep.incline === undefined) onStep.incline = 0;
+            steps.push(onStep as WorkoutStep);
+          }
         }
-        
+
         // OFF Interval
         if (offDuration > 0) {
-            const offStep: Partial<WorkoutStep> = { duration: offDuration };
-            if (sportType === 'run' && offPaceAttr) {
-                offStep.speed = parseFloat(offPaceAttr) * 3.6; // m/s to km/h
-            } else if (offPowerAttr) {
-                const power = parseFloat(offPowerAttr);
-                offStep.power = power;
-                if (sportType === 'run') {
-                     offStep.speed = power * 14;
-                } else { // Bike
-                    offStep.speed = power * 10;
-                    offStep.incline = power * 2;
-                }
+          const offStep: Partial<WorkoutStep> = { duration: offDuration };
+          if (sportType === 'run' && offPaceAttr) {
+            offStep.speed = parseFloat(offPaceAttr) * 3.6; // m/s to km/h
+          } else if (offPowerAttr) {
+            const power = parseFloat(offPowerAttr);
+            offStep.power = power;
+            if (sportType === 'run') {
+              offStep.speed = power * 14;
+            } else { // Bike
+              offStep.speed = power * 10;
+              offStep.incline = power * 2;
             }
-            if (offStep.speed !== undefined) {
-                 if(offStep.incline === undefined) offStep.incline = 0;
-                 steps.push(offStep as WorkoutStep);
-            }
+          }
+          if (offStep.speed !== undefined) {
+            if (offStep.incline === undefined) offStep.incline = 0;
+            steps.push(offStep as WorkoutStep);
+          }
         }
       }
       return;
@@ -117,7 +117,7 @@ export const parseZwoFile = (fileContent: string): Workout => {
         step.speed = pace * 3.6; // Convert m/s to km/h
       }
     }
-    
+
     // Use power as a fallback to derive speed if not set by pace
     if (powerValue !== null && step.speed === undefined) {
       step.power = powerValue;
@@ -144,7 +144,7 @@ export const parseZwoFile = (fileContent: string): Workout => {
     if (step.speed !== undefined || step.incline !== undefined) {
       // If a step defines speed but not incline, assume flat ground.
       if (step.incline === undefined) {
-          step.incline = 0;
+        step.incline = 0;
       }
       steps.push(step as WorkoutStep);
     }

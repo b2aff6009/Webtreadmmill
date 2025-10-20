@@ -9,7 +9,7 @@ interface IcuSettings {
  */
 const parsePaceToSeconds = (pace: string): number => {
   const parts = pace.split(':').map(Number);
-  if (parts.length !== 2 || isNaN(parts[0]) || isNaN(parts[1])) {
+  if (parts.length !== 2 || Number.isNaN(parts[0]) || Number.isNaN(parts[1])) {
     throw new Error(`Invalid pace format. Expected "mm:ss", but got "${pace}".`);
   }
   return parts[0] * 60 + parts[1];
@@ -28,7 +28,7 @@ const paceToSpeed = (paceInSecondsPerKm: number): number => {
  */
 const parseDuration = (durationStr: string): number => {
   const value = parseInt(durationStr, 10);
-  if (isNaN(value)) {
+  if (Number.isNaN(value)) {
     throw new Error(`Invalid duration value in "${durationStr}".`);
   }
 
