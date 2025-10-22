@@ -101,13 +101,34 @@ function App() {
     }
   }
 
+  const [showDisclaimer, setShowDisclaimer] = useState(false)
+  const [pendingStart, setPendingStart] = useState(false)
+
   const handleStartWorkout = () => {
+    if (!showDisclaimer) {
+      setShowDisclaimer(true)
+      setPendingStart(true)
+      return
+    }
     if (ftms.connectionStatus === ConnectionStatus.CONNECTED) {
       ftms.startWorkout()
       workoutControl.play()
     } else {
       alert(`Please connect to a treadmill first${isTestMode ? ' (in test mode)' : ''}.`)
     }
+  }
+
+  const handleAcceptDisclaimer = () => {
+    setShowDisclaimer(false)
+    if (pendingStart) {
+      setPendingStart(false)
+      handleStartWorkout()
+    }
+  }
+
+  const handleDeclineDisclaimer = () => {
+    setShowDisclaimer(false)
+    setPendingStart(false)
   }
 
   const handleResetWorkout = () => {
@@ -150,11 +171,47 @@ function App() {
     </div>
   )
 
+  const isProduction = process.env.NODE_ENV === 'production'
+
   return (
     <div className="h-full bg-gray-900 text-gray-200 font-sans p-4 sm:p-6 lg:p-8 flex flex-col">
-      <Header isTestMode={isTestMode} onTestModeChange={setIsTestMode} isConnected={isConnected}>
+      <Header
+        isTestMode={isTestMode}
+        onTestModeChange={setIsTestMode}
+        isConnected={isConnected}
+        isProduction={isProduction}
+      >
         <ConnectButton status={ftms.connectionStatus} onConnect={ftms.connect} onDisconnect={ftms.disconnect} />
       </Header>
+
+      {showDisclaimer && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-8">
+          <div className="bg-gray-800 rounded-2xl shadow-2xl p-8 max-w-lg w-full flex flex-col gap-6">
+            <h2 className="text-2xl font-bold text-cyan-400">Disclaimer</h2>
+            <p className="text-gray-200 text-base">
+              The provider and/or developer of this app is not responsible for any damage, injury, or loss resulting
+              from the use of this application. Use at your own risk. Always consult a medical professional before
+              starting any exercise program.
+            </p>
+            <div className="flex justify-end gap-4 pt-2">
+              <button
+                type="button"
+                onClick={handleDeclineDisclaimer}
+                className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-500 transition font-semibold"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleAcceptDisclaimer}
+                className="px-4 py-2 bg-cyan-600 text-white rounded-md hover:bg-cyan-700 transition font-semibold"
+              >
+                I Accept
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <main className="flex-grow flex flex-col lg:flex-row gap-6 mt-6 min-h-0">
         <div className="lg:w-2/3 flex flex-col gap-6 h-full min-h-0">
