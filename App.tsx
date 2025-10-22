@@ -157,13 +157,15 @@ function App() {
       </Header>
 
       <main className="flex-grow flex flex-col lg:flex-row gap-6 mt-6 min-h-0">
-        <div className="lg:w-2/3 flex flex-col gap-6">
-          <Dashboard
-            data={ftms.treadmillData}
-            workoutHistory={workoutHistory}
-            workout={workoutControl.workout}
-            settings={settings}
-          />
+        <div className="lg:w-2/3 flex flex-col gap-6 h-full min-h-0">
+          <div className="flex-grow h-full min-h-0">
+            <Dashboard
+              data={ftms.treadmillData}
+              workoutHistory={workoutHistory}
+              workout={workoutControl.workout}
+              settings={settings}
+            />
+          </div>
         </div>
 
         <div className="lg:w-1/3 bg-gray-800 rounded-lg shadow-lg p-6 flex flex-col gap-6">

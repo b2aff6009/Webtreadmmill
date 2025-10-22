@@ -24,9 +24,8 @@ export const parseZwoFile = (fileContent: string): Workout => {
   }
 
   const steps: WorkoutStep[] = []
-
-  workoutNode.childNodes.forEach(node => {
-    if (node.nodeType !== Node.ELEMENT_NODE) return
+  for (const node of workoutNode.childNodes) {
+    if (node.nodeType !== Node.ELEMENT_NODE) continue
 
     const element = node as Element
     const tagName = element.tagName
@@ -151,7 +150,8 @@ export const parseZwoFile = (fileContent: string): Workout => {
       }
       steps.push(step as WorkoutStep)
     }
-  })
+  }
+  // ...existing code...
 
   if (steps.length === 0) {
     throw new Error('No valid workout steps found in the file.')

@@ -14,6 +14,8 @@ export default defineConfig(({ mode }) => {
       'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
     },
+    // Serve workouts folder as static assets
+    publicDir: 'workouts',
     // GitHub Pages serves from a subdirectory, adjust base path accordingly
     base: mode === 'production' ? '/webmill/' : '/',
     resolve: {

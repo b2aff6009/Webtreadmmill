@@ -120,7 +120,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, workoutHistory, work
       cumulativeTime += step.duration
     }
 
-    workoutHistory.forEach(historyPoint => {
+    for (const historyPoint of workoutHistory) {
       if (profileData[historyPoint.time]) {
         profileData[historyPoint.time].pace = speedKmhToPaceSecs(historyPoint.speed)
         profileData[historyPoint.time].incline = historyPoint.incline
@@ -128,7 +128,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, workoutHistory, work
           profileData[historyPoint.time].heartRate = historyPoint.heartRate
         }
       }
-    })
+    }
 
     return profileData
   }, [workout, workoutHistory])
@@ -139,13 +139,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, workoutHistory, work
     let minPace = Infinity
     let maxPace = 0
 
-    chartData.forEach(d => {
+    for (const d of chartData) {
       const paces = [d.targetPace, d.pace].filter(p => p !== null && Number.isFinite(p)) as number[]
       for (const p of paces) {
         if (p < minPace) minPace = p
         if (p > maxPace) maxPace = p
       }
-    })
+    }
 
     if (!Number.isFinite(minPace)) return [180, 600]
 
@@ -168,8 +168,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, workoutHistory, work
   const yAxisMaxHr = Math.round(settings.thresholdHr * 1.1)
 
   return (
-    <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg shadow-lg p-6 space-y-6">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg shadow-lg p-6 flex flex-col h-full gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 flex-shrink-0">
         <StatCard
           icon={<SpeedIcon className="w-6 h-6 text-cyan-400" />}
           label="Pace"
@@ -195,7 +195,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, workoutHistory, work
           unit="bpm"
         />
       </div>
-      <div className="h-80 w-full">
+      <div className="flex-grow w-full min-h-0">
         {workout ? (
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart
