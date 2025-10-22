@@ -42,24 +42,50 @@ const parseDuration = (durationStr: string): number => {
 }
 
 /**
- * Parses intensity strings like "120% Pace" into a speed object.
+ * Parses intensity strings like "120% Pace" or "4:30 Pace @ 2% Incline" into a speed object.
  */
 const parseIntensity = (intensityStr: string, settings: IcuSettings): { speed: number; incline: number } => {
-  const paceMatch = intensityStr.match(/(\d+)\s*%\s*Pace/i)
-  if (paceMatch) {
-    const percentage = parseInt(paceMatch[1], 10) / 100
+  let paceStr = intensityStr
+  let incline = 0
+
+  // Check for an optional incline part, e.g., "@ 2.5% Incline"
+  const inclineMatch = intensityStr.match(/@\s*([\d.]+)\s*%\s*Incline/i)
+  if (inclineMatch) {
+    incline = parseFloat(inclineMatch[1])
+    if (Number.isNaN(incline)) {
+      throw new Error(`Invalid incline value in "${intensityStr}".`)
+    }
+    // Remove the incline part from the string to parse the pace
+    paceStr = intensityStr.substring(0, inclineMatch.index).trim()
+  }
+
+  // Check for absolute pace format "mm:ss Pace"
+  const absolutePaceMatch = paceStr.match(/(\d{1,2}:\d{2})\s*Pace/i)
+  if (absolutePaceMatch) {
+    const paceString = absolutePaceMatch[1]
+    const targetPaceInSeconds = parsePaceToSeconds(paceString)
+    const speed = paceToSpeed(targetPaceInSeconds)
+    return { speed, incline }
+  }
+
+  // Check for percentage pace format "120% Pace"
+  const percentagePaceMatch = paceStr.match(/(\d+)\s*%\s*Pace/i)
+  if (percentagePaceMatch) {
+    const percentage = parseInt(percentagePaceMatch[1], 10) / 100
     if (percentage <= 0) {
-      throw new Error(`Pace percentage must be positive, but got "${intensityStr}".`)
+      throw new Error(`Pace percentage must be positive, but got "${paceStr}".`)
     }
 
     const thresholdPaceInSeconds = parsePaceToSeconds(settings.thresholdPace)
     const targetPaceInSeconds = thresholdPaceInSeconds / percentage
     const speed = paceToSpeed(targetPaceInSeconds)
 
-    return { speed, incline: 0 } // .icu format doesn't specify incline, default to 0.
+    return { speed, incline }
   }
 
-  throw new Error(`Unsupported intensity format: "${intensityStr}". Only "% Pace" is supported.`)
+  throw new Error(
+    `Unsupported intensity format: "${intensityStr}". Supported formats are "X% Pace" or "mm:ss Pace", optionally with "@ Y% Incline".`
+  )
 }
 
 /**
@@ -70,7 +96,7 @@ const parseStepLine = (line: string, settings: IcuSettings): WorkoutStep => {
   const firstSpaceIndex = content.indexOf(' ')
 
   if (firstSpaceIndex === -1) {
-    throw new Error(`Invalid step format: "${line}". Expected format like "- 4m 80% Pace".`)
+    throw new Error(`Invalid step format: "${line}". Expected format like "- 4m 80% Pace @ 1% Incline".`)
   }
 
   const durationStr = content.substring(0, firstSpaceIndex)

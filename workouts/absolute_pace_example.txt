@@ -1,0 +1,8 @@
+Absolute Pace Example
+- 10s 6:00 Pace @ 1% Incline
+
+10x
+- 20s 4:00 Pace @ 2.5% Incline
+- 20s 7:00 Pace @ 0% Incline
+
+- 5m 6:30 Pace @ 0.5% Incline

@@ -15,6 +15,7 @@ const availableWorkouts = [
   { file: 'easy_recovery.txt', name: 'Easy Recovery Run' },
   { file: 'pyramid_intervals.txt', name: 'Pyramid Intervals' },
   { file: 'tempo_run.txt', name: 'Tempo Run' },
+  { file: 'absolute_pace_example.txt', name: 'Absolute Pace Example' },
 ]
 
 export const WorkoutLibrary: React.FC<WorkoutLibraryProps> = ({ onLoad, settings }) => {
