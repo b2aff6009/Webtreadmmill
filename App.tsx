@@ -173,6 +173,7 @@ function App() {
 
   const isProduction = process.env.NODE_ENV === 'production'
 
+  const appVersion = import.meta.env.VITE_APP_VERSION || 'unknown'
   return (
     <div className="h-full bg-gray-900 text-gray-200 font-sans p-4 sm:p-6 lg:p-8 flex flex-col">
       <Header
@@ -258,6 +259,7 @@ function App() {
           </div>
         </div>
       </main>
+      <footer className="mt-8 text-center text-xs text-gray-500">WebMill v{appVersion}</footer>
     </div>
   )
 }
